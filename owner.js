@@ -8,7 +8,7 @@ cmd({
     category: "main",
     filename: __filename
 },
-async (robin, mek, m, { quoted, reply, isOwner }) => {
+async (Lakshan, mek, m, { quoted, reply, isOwner }) => {
     try {
         // Check if the user is the bot owner
         if (!isOwner) return reply("⚠️ Only the owner can use this command!");
@@ -20,7 +20,7 @@ async (robin, mek, m, { quoted, reply, isOwner }) => {
         const target = quoted.sender;
 
         // Block the target user
-        await robin.updateBlockStatus(target, "block");
+        await Lakshan.updateBlockStatus(target, "block");
 
         // Confirm success
         return reply(`✅ Successfully blocked: @${target.split('@')[0]}`);
@@ -39,7 +39,7 @@ cmd({
     category: "main",
     filename: __filename
 },
-async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) => {
+async (Lakshan, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) => {
     try {
         // Check if the command is used in a group
         if (!isGroup) return reply("⚠️ This command can only be used in a group!");
@@ -57,7 +57,7 @@ async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) =
         const target = quoted.sender;
 
         // Ensure the target is not another admin
-        const groupMetadata = await robin.groupMetadata(from);
+        const groupMetadata = await Lakshan.groupMetadata(from);
         const groupAdmins = groupMetadata.participants.filter(participant => participant.admin).map(admin => admin.id);
 
         if (groupAdmins.includes(target)) {
@@ -65,7 +65,7 @@ async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) =
         }
 
         // Kick the target user
-        await robin.groupParticipantsUpdate(from, [target], "remove");
+        await Lakshan.groupParticipantsUpdate(from, [target], "remove");
 
         // Confirm the action
         return reply(`✅ Successfully removed: @${target.split('@')[0]}`);
@@ -84,7 +84,7 @@ cmd({
     category: "main",
     filename: __filename
 },
-async (robin, mek, m, { from, isGroup, isOwner, reply }) => {
+async (Lakshan, mek, m, { from, isGroup, isOwner, reply }) => {
     try {
         // Check if the command is used in a group
         if (!isGroup) return reply("⚠️ This command can only be used in a group!");
@@ -93,7 +93,7 @@ async (robin, mek, m, { from, isGroup, isOwner, reply }) => {
         if (!isOwner) return reply("⚠️ Only the owner can use this command!");
 
         // Leave the group
-        await robin.groupLeave(from);
+        await Lakshan.groupLeave(from);
 
         // Confirm leaving
         console.log(`✅ Successfully left the group: ${from}`);
@@ -113,7 +113,7 @@ cmd({
     category: "main",
     filename: __filename
 },
-async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
+async (Lakshan, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
     try {
         // Check if the command is used in a group
         if (!isGroup) return reply("⚠️ This command can only be used in a group!");
@@ -125,7 +125,7 @@ async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
         if (!isBotAdmins) return reply("⚠️ I need to be an admin to execute this command!");
 
         // Set the group to admin-only
-        await robin.groupSettingUpdate(from, "announcement");
+        await Lakshan.groupSettingUpdate(from, "announcement");
 
         // Confirm the action
         return reply("✅ Group has been muted. Only admins can send messages now!");
@@ -143,7 +143,7 @@ cmd({
     category: "main",
     filename: __filename
 },
-async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
+async (Lakshan, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
     try {
         // Check if the command is used in a group
         if (!isGroup) return reply("⚠️ This command can only be used in a group!");
@@ -155,7 +155,7 @@ async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply }) => {
         if (!isBotAdmins) return reply("⚠️ I need to be an admin to execute this command!");
 
         // Set the group to everyone can message
-        await robin.groupSettingUpdate(from, "not_announcement");
+        await Lakshan.groupSettingUpdate(from, "not_announcement");
 
         // Confirm the action
         return reply("✅ Group has been unmuted. Everyone can send messages now!");
@@ -174,7 +174,7 @@ cmd({
     category: "main",
     filename: __filename
 },
-async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, args }) => {
+async (Lakshan, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, args }) => {
     try {
         // Check if the command is used in a group
         if (!isGroup) return reply("⚠️ This command can only be used in a group!");
@@ -192,7 +192,7 @@ async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, args }) => 
         const target = args[0].includes("@") ? args[0] : `${args[0]}@s.whatsapp.net`;
 
         // Add the user to the group
-        await robin.groupParticipantsUpdate(from, [target], "add");
+        await Lakshan.groupParticipantsUpdate(from, [target], "add");
 
         // Confirm success
         return reply(`✅ Successfully added: @${target.split('@')[0]}`);
@@ -211,7 +211,7 @@ cmd({
     category: "main",
     filename: __filename
 },
-async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) => {
+async (Lakshan, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) => {
     try {
         // Check if the command is used in a group
         if (!isGroup) return reply("⚠️ This command can only be used in a group!");
@@ -232,7 +232,7 @@ async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) =
         if (target === from) return reply("⚠️ You cannot remove your own admin privileges!");
 
         // Ensure the target is an admin
-        const groupMetadata = await robin.groupMetadata(from);
+        const groupMetadata = await Lakshan.groupMetadata(from);
         const groupAdmins = groupMetadata.participants.filter(participant => participant.admin).map(admin => admin.id);
 
         if (!groupAdmins.includes(target)) {
@@ -240,7 +240,7 @@ async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) =
         }
 
         // Demote the target user
-        await robin.groupParticipantsUpdate(from, [target], "demote");
+        await Lakshan.groupParticipantsUpdate(from, [target], "demote");
 
         // Confirm the action
         return reply(`✅ Successfully removed admin privileges from: @${target.split('@')[0]}`);
@@ -259,7 +259,7 @@ cmd({
     category: "main",
     filename: __filename
 },
-async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) => {
+async (Lakshan, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) => {
     try {
         // Check if the command is used in a group
         if (!isGroup) return reply("⚠️ This command can only be used in a group!");
@@ -277,7 +277,7 @@ async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) =
         const target = quoted.sender;
 
         // Ensure the target is not already an admin
-        const groupMetadata = await robin.groupMetadata(from);
+        const groupMetadata = await Lakshan.groupMetadata(from);
         const groupAdmins = groupMetadata.participants.filter(participant => participant.admin).map(admin => admin.id);
 
         if (groupAdmins.includes(target)) {
@@ -285,7 +285,7 @@ async (robin, mek, m, { from, isGroup, isAdmins, isBotAdmins, reply, quoted }) =
         }
 
         // Promote the target user to admin
-        await robin.groupParticipantsUpdate(from, [target], "promote");
+        await Lakshan.groupParticipantsUpdate(from, [target], "promote");
 
         // Confirm the action
         return reply(`✅ Successfully promoted @${target.split('@')[0]} to admin!`);
