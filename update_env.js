@@ -16,34 +16,35 @@ async (robin, mek, m, { from, q, reply, isOwner }) => {
         return reply("🙇‍♂️ *Please provide the environment variable and its new value.* \n\nExample: `.update ALIVE_MSG: hello i am Isara Sihilel`");
     }
 
-    // Find the position of the first colon or comma
-    const colonIndex = q.indexOf(':');
-    const commaIndex = q.indexOf(',');
-
-    // Ensure we have a valid delimiter index
-    const delimiterIndex = colonIndex !== -1 ? colonIndex : commaIndex;
+    // Detect delimiter (colon or comma)
+    const delimiterIndex = q.indexOf(':') !== -1 ? q.indexOf(':') : q.indexOf(',');
     if (delimiterIndex === -1) {
         return reply("🫠 *Invalid format. Please use the format:* `.update KEY:VALUE`");
     }
 
     // Extract key and value
-    const key = q.substring(0, delimiterIndex).trim();
-    const value = q.substring(delimiterIndex + 1).trim();
-    
-    // Extract mode if provided
-    const parts = value.split(/\s+/).filter(part => part.trim());
-    const newValue = value; // Use the full value as provided by the user
-    const mode = parts.length > 1 ? parts.slice(1).join(' ').trim() : '';
-    
-    const validModes = ['public', 'private', 'groups', 'inbox'];
-    const finalMode = validModes.includes(mode) ? mode : '';
+    const key = q.substring(0, delimiterIndex).trim().toUpperCase();
+    const rawValue = q.substring(delimiterIndex + 1).trim();
 
-    if (!key || !newValue) {
+    if (!key || !rawValue) {
         return reply("🫠 *Invalid format. Please use the format:* `.update KEY:VALUE`");
     }
 
-    // Specific checks for MODE, ALIVE_IMG, and AUTO_READ_STATUS
-    if (key === 'MODE' && !validModes.includes(newValue)) {
+    // Split words to check if last part is mode
+    const parts = rawValue.split(/\s+/);
+    let newValue = rawValue;
+    let finalMode = "";
+
+    const validModes = ['public', 'private', 'groups', 'inbox'];
+    const lastWord = parts[parts.length - 1].toLowerCase();
+
+    if (validModes.includes(lastWord)) {
+        finalMode = lastWord;
+        newValue = parts.slice(0, -1).join(" ");
+    }
+
+    // Key specific validations
+    if (key === 'MODE' && !validModes.includes(newValue.toLowerCase())) {
         return reply(`😒 *Invalid mode. Valid modes are: ${validModes.join(', ')}*`);
     }
 
@@ -51,27 +52,25 @@ async (robin, mek, m, { from, q, reply, isOwner }) => {
         return reply("😓 *Invalid URL format. PLEASE GIVE ME IMAGE URL*");
     }
 
-    if (key === 'AUTO_READ_STATUS' && !['true', 'false'].includes(newValue)) {
+    if (key === 'AUTO_READ_STATUS' && !['true', 'false'].includes(newValue.toLowerCase())) {
         return reply("😓 *Invalid value for AUTO_READ_STATUS. Please use `true` or `false`.*");
     }
 
     try {
-        // Check if the environment variable exists
-        const envVar = await EnvVar.findOne({ key: key });
+        const envVar = await EnvVar.findOne({ key });
 
         if (!envVar) {
-            // If the variable does not exist, fetch and list all existing env vars
             const allEnvVars = await EnvVar.find({});
             const envList = allEnvVars.map(env => `${env.key}: ${env.value}`).join('\n');
             return reply(`❌ *The environment variable ${key} does not exist.*\n\n*Here are the existing environment variables:*\n\n${envList}`);
         }
 
-        // Update the environment variable
         await updateEnv(key, newValue, finalMode);
-        reply(`✅ *Environment variable updated.*\n\n🗃️ *${key}* ➠ ${newValue} ${finalMode ? `\n*Mode:* ${finalMode}` : ''}`);
-        
+        reply(`✅ *Environment variable updated.*\n\n🗃️ *${key}* ➠ ${newValue}${finalMode ? `\n*Mode:* ${finalMode}` : ''}`);
+
     } catch (err) {
-        console.error('Error updating environment variable:' + err.message);
-        reply("🙇‍♂️ *Failed to update the environment variable. Please try again.*" + err);
+        console.error('Error updating environment variable: ' + err.message);
+        reply("🙇‍♂️ *Failed to update the environment variable. Please try again.*\n\nError: " + err.message);
     }
 });
+
